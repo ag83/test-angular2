@@ -1,0 +1,75 @@
+<md-grid-list cols="4" rowHeight="5rem" *ngIf="providers && managers">
+  <md-grid-tile colspan="4" rowspan="1" *ngIf="providers.length > 0 && managers.length > 0">
+    <md-grid-tile-header>
+      Add new manager or provider
+    </md-grid-tile-header>
+  </md-grid-tile>
+  <md-grid-tile colspan="2" >
+    <md-input-container>
+      <input mdInput placeholder="Add Manager" name="manager" value="" [(ngModel)]="managerToAdd" required minlength="2" maxlength="30" pattern="[a-zA-Z0-9 ]*" #manager="ngModel">
+    </md-input-container>
+    <button md-icon-button (click)="addManager()" [disabled]="manager.errors"><md-icon>check</md-icon></button>
+  </md-grid-tile>
+  <md-grid-tile colspan="2">
+    <md-input-container>
+      <input mdInput placeholder="Add Provider" name="provider" value="" [(ngModel)]="providerToAdd" required minlength="2" maxlength="30" pattern="[a-zA-Z0-9 ]*" #provider="ngModel">
+    </md-input-container>
+    <button md-icon-button (click)="addProvider()" [disabled]="provider.errors"><md-icon>check</md-icon></button>
+  </md-grid-tile>
+  <md-grid-tile colspan="4" rowspan="1" *ngIf="providers.length > 0 && managers.length > 0">
+    <md-grid-tile-header>
+      Add new order
+    </md-grid-tile-header>
+  </md-grid-tile>
+  <md-grid-tile colspan="4" rowspan="1" *ngIf="!providers.length > 0 || !managers.length > 0">
+    First add managers and providers
+  </md-grid-tile>
+</md-grid-list>
+<md-grid-list cols="4" rowHeight="5rem" *ngIf="providers && managers && providers.length > 0 && managers.length > 0" [formGroup]="orderForm">
+  <md-grid-tile colspan="2" rowspan="1" class="calendar-row">
+    <span class="order-form-label">Creation date</span>
+    <material-datepicker [(date)]="createdAt" [(ngModel)]="createdAt" formControlName="createdDate" ngDefaultControl></material-datepicker>
+  </md-grid-tile>
+  <md-grid-tile colspan="2" rowspan="1" class="calendar-row">
+    <span class="order-form-label">Expiration date</span>
+    <material-datepicker [(date)]="expiresAt" [(ngModel)]="expiresAt" formControlName="expiredDate" ngDefaultControl></material-datepicker>
+  </md-grid-tile>
+  <md-grid-tile colspan="1" rowspan="2">
+    <md-select placeholder="Manager" formControlName="managerName">
+       <md-option *ngFor="let manager of managers" [value]="manager._id">{{ manager.manager }}</md-option>
+    </md-select>
+  </md-grid-tile>
+  <md-grid-tile colspan="1" rowspan="2">
+    <md-select placeholder="Provider" formControlName="providerName">
+       <md-option *ngFor="let provider of providers" [value]="provider._id">{{ provider.provider }}</md-option>
+    </md-select>
+  </md-grid-tile>
+  <md-grid-tile colspan="1" rowspan="2">
+    <md-select placeholder="Order type" formControlName="orderType">
+      <md-option value="wholesail">wholesail</md-option>
+      <md-option value="retail">retail</md-option>
+    </md-select>
+  </md-grid-tile>
+  <md-grid-tile colspan="1" rowspan="2">
+      <md-input-container>
+        <input mdInput placeholder="Client name" value="" [(ngModel)]="clientName" formControlName="client">
+      </md-input-container>
+  </md-grid-tile>
+  <md-grid-tile colspan="4" rowspan="1">
+    <div *ngIf="orderForm.controls.createdDate.hasError('required') && orderForm.controls.createdDate.touched" class="error-box">Created date is required</div>
+    <div *ngIf="orderForm.controls.expiredDate.hasError('required') && orderForm.controls.expiredDate.toched" class="error-box">Expired date is required</div>
+    <div *ngIf="orderForm.controls.managerName.hasError('required') && orderForm.controls.managerName.touched" class="error-box">Manager field is required</div>
+    <div *ngIf="orderForm.controls.providerName.hasError('required') && orderForm.controls.providerName.touched" class="error-box">Provider field is required</div>
+    <div *ngIf="orderForm.controls.orderType.hasError('required') && orderForm.controls.orderType.touched" class="error-box">Order type field is required</div>
+    <div *ngIf="orderForm.controls.client.hasError('required') && orderForm.controls.client.touched" class="error-box">Client field is required</div>
+    <div *ngIf="orderForm.controls.client.hasError('pattern') && orderForm.controls.client.touched" class="error-box">Only letters and digits allowed in client field</div>
+    <div *ngIf="orderForm.controls.client.hasError('maxlength') && orderForm.controls.client.touched" class="error-box">Client field maximum length is 300</div>
+    <div *ngIf="orderForm.controls.client.hasError('minlength') && orderForm.controls.client.touched" class="error-box">Client field minimum length is 2</div>
+    <div *ngIf="!orderForm.valid && orderForm.controls.expiredDate.value && orderForm.controls.createdDate.value && orderForm.controls.createdDate.value.setHours(0,0,0,0) > orderForm.controls.expiredDate.value" class="error-box">Created date is must be before Expired date</div>
+  </md-grid-tile>
+  <md-grid-tile colspan="4" rowspan="1" >
+    <button md-raised-button (click)="addOrder()" [disabled]="!orderForm.valid || formSubmitted">Add order</button>
+  </md-grid-tile>
+</md-grid-list>
+
+

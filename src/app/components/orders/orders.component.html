@@ -1,0 +1,146 @@
+<div class="container">
+  <div class="row" *ngIf="!ordersLoad && orders.length">
+    <div class="col-2">
+      <form>
+        <div class="form-group">
+          <label for="filterByClient">Filter by client</label>
+          <input type="text" class="form-control" name="filterByClient" placeholder="Enter name" [(ngModel)]="filterByClient" (ngModelChange)='filterOrders()' >
+        </div>
+        <div class="form-group">
+          <label for="filterByManager">Filter by manager</label>
+          <input type="text" class="form-control" name="filterByManager" placeholder="Enter name" [(ngModel)]="filterByManager" (ngModelChange)='filterOrders()' >
+        </div>
+        <div class="form-group">
+          <label for="filterByProvider">Filter by provider</label>
+          <input type="text" class="form-control" name="filterByProvider" placeholder="Enter name" [(ngModel)]="filterByProvider" (ngModelChange)='filterOrders()'>
+        </div>
+      </form>
+    </div>
+    <div class="col-10">
+      <div class="table-container table-responsive">
+        <table style="width:100%" class="table table-striped">
+          <tr>
+            <th class="table-header" (click)="changeSorting('orderId')">
+              <span>Order Id</span>
+              <md-icon *ngIf="sortingProp === 'orderId' && !sortingType">expand_less</md-icon>
+              <md-icon *ngIf="sortingProp === 'orderId' && sortingType">expand_more</md-icon>
+            </th>
+            <th class="table-header" (click)="changeSorting('createdAt')">
+              <span>Created</span>
+              <md-icon *ngIf="sortingProp === 'createdAt' && !sortingType">expand_less</md-icon>
+              <md-icon *ngIf="sortingProp === 'createdAt' && sortingType">expand_more</md-icon>
+            </th> 
+            <th class="table-header" (click)="changeSorting('expiresAt')" >
+              <span>Expired</span>
+              <md-icon *ngIf="sortingProp === 'expiresAt' && !sortingType">expand_less</md-icon>
+              <md-icon *ngIf="sortingProp === 'expiresAt' && sortingType">expand_more</md-icon>              
+            </th>
+            <th class="table-header" (click)="changeSorting('clientName')" >
+              <span>Client</span>
+              <md-icon *ngIf="sortingProp === 'clientName' && !sortingType">expand_less</md-icon>
+              <md-icon *ngIf="sortingProp === 'clientName' && sortingType">expand_more</md-icon>              
+            </th>
+            <th class="table-header" (click)="changeSorting('managerName')" >
+              <span>Manager</span>
+              <md-icon *ngIf="sortingProp === 'managerName' && !sortingType">expand_less</md-icon>
+              <md-icon *ngIf="sortingProp === 'managerName' && sortingType">expand_more</md-icon>              
+            </th>
+            <th class="table-header" (click)="changeSorting('provider')" >
+              <span>Provider</span>
+              <md-icon *ngIf="sortingProp === 'provider' && !sortingType">expand_less</md-icon>
+              <md-icon *ngIf="sortingProp === 'provider' && sortingType">expand_more</md-icon>            
+            </th>
+            <th class="table-header" (click)="changeSorting('orderType')" >
+              <span>Type</span>
+              <md-icon *ngIf="sortingProp === 'orderType' && !sortingType">expand_less</md-icon>
+              <md-icon *ngIf="sortingProp === 'orderType' && sortingType">expand_more</md-icon>              
+            </th>
+            <th class="table-header" >
+              <span>Status</span>
+            </th>
+          </tr>
+          <tr *ngFor="let order of ordersFiltered |sortArr: sortingProp : sortingType |pagination: currentPage : showLimit " >
+            <td>{{order.orderId}}</td>
+            <td>{{order.createdAt | date:shortDate}}</td>
+            <td>{{order.expiresAt | date:shortDate}}</td>
+            <td>{{order.clientName}}</td>
+            <td>{{order.managerName}}</td>
+            <td>{{order.provider}}</td>
+            <td>{{order.orderType}}</td>
+            <td>
+              <button type="button" class="btn btn-secondary btn-sm" *ngIf="order.redactable" (click)="openRedactOrderModal(content, order)">Redact</button>
+              <span *ngIf="!order.outdated && !order.redactable">In process</span>
+              <span *ngIf="order.outdated">Expired</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="row">
+        <div class="col-10">
+          <ngb-pagination [(collectionSize)]="ordersFiltered.length" [(page)]="currentPage" maxSize="5" [(pageSize)]="showLimit" boundaryLinks="false" *ngIf="ordersFiltered.length > showLimit"></ngb-pagination>
+        </div>
+        <div class="col-2">
+          <div class="form-group">
+            <label for="showLimit">Show items</label>
+            <select class="form-control" name="showLimit" [(ngModel)]="showLimit" >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row" *ngIf="!ordersLoad && !orders.length">
+    <div class="alert alert-danger" role="alert">
+      Currently no orders there
+    </div>
+  </div>
+</div>
+
+<template #content let-c="close" let-d="dismiss" ngbModalContainer>
+  <div class="modal-header">
+    <h4 class="modal-title">Change order</h4>
+    <button type="button" class="close" (click)="d('Cross click')">
+      <span>&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form >
+      <div class="row">
+      <div class="col-12">
+        <div class="form-group">
+          <div class="input-group">
+            <label class="form-control-label" >Expiration</label>
+            <input class="form-control" name="expiresAt" [(ngModel)]="currentOrder.expires" ngbDatepicker #datePicker="ngbDatepicker">
+            <div class="input-group-addon" (click)="datePicker.toggle()" >
+              <span>Change</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="form-group">
+          <label class="form-control-label" >Provider</label>
+          <select placeholder="Provider" class="form-control" name="provider" [(ngModel)]="currentOrder.provider">
+             <option *ngFor="let provider of providers " [value]="provider._id" [disabled]="provider._id === currentOrder.providerId">{{ provider.provider }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="form-group">
+          <label class="form-control-label" >Manager</label>
+          <select placeholder="Manager" class="form-control" name="manager" [(ngModel)]="currentOrder.managerName">
+             <option *ngFor="let manager of managers" [value]="manager._id" [disabled]="manager._id === currentOrder.managerId">{{ manager.manager }}</option>
+          </select>
+        </div>
+      </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="c('Close');changeOrder()">Save</button>
+    <button type="button" class="btn btn-secondary" (click)="c('Close')">Cancel</button>
+  </div>
+</template>

@@ -1,0 +1,12 @@
+.order-form-label {
+   padding: 5px;
+}
+
+.calendar-row {
+    overflow: visible;
+}
+
+.error-box {
+    font-size: 0.7em;
+    color: red;
+}
